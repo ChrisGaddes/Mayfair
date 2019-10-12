@@ -17,4 +17,3 @@ class SignInButton extends CustomRaisedButton {
         onPressed: onPressed,
       );
 }
-

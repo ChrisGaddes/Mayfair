@@ -8,8 +8,6 @@ import 'package:mayfair/common_widgets/platform_exception_alert_dialog.dart';
 import 'package:mayfair/services/auth.dart';
 import 'package:provider/provider.dart';
 
-
-
 class EmailSignInFormStateful extends StatefulWidget with EmailAndPasswordValidators {
   @override
   _EmailSignInFormStatefulState createState() => _EmailSignInFormStatefulState();
@@ -22,7 +20,6 @@ class _EmailSignInFormStatefulState extends State<EmailSignInFormStateful> {
   final FocusNode _passwordFocusNode = FocusNode();
 
   String get _email => _emailController.text;
-
   String get _password => _passwordController.text;
   EmailSignInFormType _formType = EmailSignInFormType.signIn;
   bool _submitted = false;

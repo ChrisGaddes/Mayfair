@@ -3,7 +3,9 @@ import 'package:mayfair/app/landing_page.dart';
 import 'package:mayfair/services/auth.dart';
 import 'package:provider/provider.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override

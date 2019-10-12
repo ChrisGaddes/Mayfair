@@ -1,4 +1,3 @@
-
 import 'package:mayfair/app/sign_in/validators.dart';
 
 enum EmailSignInFormType { signIn, register }
@@ -11,6 +10,7 @@ class EmailSignInModel with EmailAndPasswordValidators {
     this.isLoading = false,
     this.submitted = false,
   });
+
   final String email;
   final String password;
   final EmailSignInFormType formType;

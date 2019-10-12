@@ -1,34 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:mayfair/app/sign_in/email_sign_in_bloc.dart';
-import 'package:mayfair/app/sign_in/email_sign_in_model.dart';
+import 'package:provider/provider.dart';
+import 'package:mayfair/app/sign_in/email_sign_in_change_model.dart';
 import 'package:mayfair/common_widgets/form_submit_button.dart';
 import 'package:mayfair/common_widgets/platform_exception_alert_dialog.dart';
 import 'package:mayfair/services/auth.dart';
-import 'package:provider/provider.dart';
 
-class EmailSignInFormBlocBased extends StatefulWidget {
-  EmailSignInFormBlocBased({@required this.bloc});
-  final EmailSignInBloc bloc;
+class EmailSignInFormChangeNotifier extends StatefulWidget {
+  EmailSignInFormChangeNotifier({@required this.model});
+  final EmailSignInChangeModel model;
 
   static Widget create(BuildContext context) {
     final AuthBase auth = Provider.of<AuthBase>(context);
-    return Provider<EmailSignInBloc>(
-      builder: (context) => EmailSignInBloc(auth: auth),
-      child: Consumer<EmailSignInBloc>(
-        builder: (context, bloc, _) => EmailSignInFormBlocBased(bloc: bloc),
+    return ChangeNotifierProvider<EmailSignInChangeModel>(
+      builder: (context) => EmailSignInChangeModel(auth: auth),
+      child: Consumer<EmailSignInChangeModel>(
+        builder: (context, model, _) =>
+            EmailSignInFormChangeNotifier(model: model),
       ),
-      dispose: (context, bloc) => bloc.dispose(),
     );
   }
 
-
   @override
-  _EmailSignInFormBlocBasedState createState() =>
-      _EmailSignInFormBlocBasedState();
+  _EmailSignInFormChangeNotifierState createState() =>
+      _EmailSignInFormChangeNotifierState();
 }
 
-class _EmailSignInFormBlocBasedState extends State<EmailSignInFormBlocBased> {
+class _EmailSignInFormChangeNotifierState
+    extends State<EmailSignInFormChangeNotifier> {
   final TextEditingController _emailController = TextEditingController();
 
   final TextEditingController _passwordController = TextEditingController();
@@ -36,6 +35,8 @@ class _EmailSignInFormBlocBasedState extends State<EmailSignInFormBlocBased> {
   final FocusNode _emailFocusNode = FocusNode();
 
   final FocusNode _passwordFocusNode = FocusNode();
+
+  EmailSignInChangeModel get model => widget.model;
 
   @override
   void dispose() {
@@ -48,7 +49,7 @@ class _EmailSignInFormBlocBasedState extends State<EmailSignInFormBlocBased> {
 
   Future<void> _submit() async {
     try {
-      await widget.bloc.submit();
+      await model.submit();
       Navigator.of(context).pop();
     } on PlatformException catch (e) {
       PlatformExceptionAlertDialog(
@@ -58,7 +59,7 @@ class _EmailSignInFormBlocBasedState extends State<EmailSignInFormBlocBased> {
     }
   }
 
-  void _emailEditingComplete(EmailSignInModel model) {
+  void _emailEditingComplete() {
     final newFocus = model.emailValidator.isValid(model.email)
         ? _passwordFocusNode
         : _emailFocusNode;
@@ -66,16 +67,16 @@ class _EmailSignInFormBlocBasedState extends State<EmailSignInFormBlocBased> {
   }
 
   void _toggleFormType() {
-    widget.bloc.toggleFormType();
+    model.toggleFormType();
     _emailController.clear();
     _passwordController.clear();
   }
 
-  List<Widget> _buildChildren(EmailSignInModel model) {
+  List<Widget> _buildChildren() {
     return [
-      _buildEmailTextField(model),
+      _buildEmailTextField(),
       SizedBox(height: 8.0),
-      _buildPasswordTextField(model),
+      _buildPasswordTextField(),
       SizedBox(height: 8.0),
       FormSubmitButton(
         text: model.primaryButtonText,
@@ -89,8 +90,7 @@ class _EmailSignInFormBlocBasedState extends State<EmailSignInFormBlocBased> {
     ];
   }
 
-  TextField _buildPasswordTextField(
-      EmailSignInModel model) {
+  TextField _buildPasswordTextField() {
     return TextField(
       controller: _passwordController,
       focusNode: _passwordFocusNode,
@@ -101,12 +101,12 @@ class _EmailSignInFormBlocBasedState extends State<EmailSignInFormBlocBased> {
       ),
       obscureText: true,
       textInputAction: TextInputAction.done,
-      onChanged: widget.bloc.updatePassword,
+      onChanged: model.updatePassword,
       onEditingComplete: _submit,
     );
   }
 
-  TextField _buildEmailTextField(EmailSignInModel model) {
+  TextField _buildEmailTextField() {
     return TextField(
       controller: _emailController,
       focusNode: _emailFocusNode,
@@ -119,26 +119,20 @@ class _EmailSignInFormBlocBasedState extends State<EmailSignInFormBlocBased> {
       autocorrect: false,
       keyboardType: TextInputType.emailAddress,
       textInputAction: TextInputAction.next,
-      onChanged: widget.bloc.updateEmail,
-      onEditingComplete: () => _emailEditingComplete(model),
+      onChanged: model.updateEmail,
+      onEditingComplete: () => _emailEditingComplete(),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<EmailSignInModel>(
-        stream: widget.bloc.modelStream,
-        initialData: EmailSignInModel(),
-        builder: (context, snapshot) {
-          final EmailSignInModel model = snapshot.data;
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisSize: MainAxisSize.min,
-              children: _buildChildren(model),
-            ),
-          );
-        });
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: _buildChildren(),
+      ),
+    );
   }
 }
